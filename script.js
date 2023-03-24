@@ -10,9 +10,15 @@ const showActiveBtnElem = document.querySelector('.show-active-btn'); // Active 
 const showCompletedBtnElem = document.querySelector('.show-completed-btn'); // Completed 버튼 (완료된 할 일 리스트를 보여줌)
 const clearCompletedBtnElem = document.querySelector('.clear-completed-btn'); // Completed Clear 버튼 (완료된 할 일 리스트를 전체 투두리스트에서 삭제함)
 
+const ToDos_ls = "todos"; //local storage에 todoList 변수명을 저장한 상수
+let todos = [];  // todos 할일을 담을 배열
 
+function saveTodos() {   //localStorage에 리스트 저장
+    localStorage.setItem('ToDos_ls',JSON.stringify(todos));
+    // 웹 스토리지는 오직 문자형(string) 데이터 타입만 지원 (다른 타입의 데이터를 저장하려고 할 때 문자형으로 변환을 하기 때문)하므로 json형태로 데이터를 읽고 쓰는 것이 일반적
+};
 
-let id = 0;  //local storage에 todoList 변수명을 저장한 상수
+let id = 0;  //새롭게 저장되는 할일의 id값
 const setId = (newId) => {id = newId};
 
 let isAllCompleted = '';  //전체 todos 체크 여부
@@ -22,7 +28,6 @@ let currentShowType = 'all';  // all | active | complete
 const setCurrentShowType = (newShowType) => currentShowType = newShowType;
 
 /* 할 일 추가하기 */
-let todos = [];  // todos 할일을 담을 배열
 const setTodos = (newTodos) => {
     todos = newTodos;  //newId 새롭게 저장되는 할일의 id값
 }
@@ -32,7 +37,7 @@ const getAllTodos = () => {
 }
 
 const getCompletedTodos = () => {
-    return todos.filter(todo => todo.isCompleted === true );
+    return todos.filter(todo => todo.isCompleted === true);
 }
 
 //현재 완료되지 않은 할 일 리스트를 반환
@@ -103,6 +108,7 @@ const deleteTodo = (todoId) => {
     alert('해당 리스트를 삭제하시겠습니까?');
     const newTodos = getAllTodos().filter(todo => todo.id !== todoId );  //입력받은 todo의 id 값과 Array filter()를 이용해 삭제하고자 하는 할 일을 제외한 새로운 할 일 목록을 가지는 배열 만들기
     setTodos(newTodos);  //기존의 todos 배열 바꾸기
+    saveTodos();
     setLeftItems();
     paintTodos();  //삭제된 todos배열로 다시 HTML를 다시 렌더링 
 }
@@ -112,6 +118,7 @@ const completeTodo = (todoId) => {
     const newTodos = getAllTodos().map(todo => todo.id === todoId ? {...todo,  isCompleted: !todo.isCompleted} : todo );
     //Array map()을 사용하여 완료 처리하고자 하는 할 일의 isCompleted 값을 토글(true이면 false로, false면 true로) 처리 
     setTodos(newTodos);  //새로운 todos 배열을 저장
+    saveTodos();
     paintTodos();
     setLeftItems();
     checkIsAllCompleted();  // 전체 todos의 완료 상태를 파악하여 전체 완료 처리 버튼 CSS 반영
@@ -122,6 +129,7 @@ const updateTodo = (text, todoId) => {
     const newTodos = getAllTodos().map(todo => todo.id === todoId ? ({...todo, content: text}) : todo);
     //getAllTodos() 함수로 todos 배열을 가져와서 map을 통해 id값을 비교하여 할 일의 내용을 수정하는 새로운 todos 배열 생성
     setTodos(newTodos);  //setTodos() 함수를 통해 새로운 todos배열을 저장
+    saveTodos();
     paintTodos();  //paintTodos() 함수를 통해 변경된 todos 배열로 할 일 리스트를 다시 렌더링
 }
 
@@ -197,6 +205,8 @@ const paintTodo = (todo) => {
     todoItemElem.appendChild(todoElem);
     todoItemElem.appendChild(delBtnElem);
     todoListElem.appendChild(todoItemElem);
+
+    saveTodos();
 }
 
 const paintTodos = () => {
@@ -238,6 +248,15 @@ const onClickShowTodosType = (e) => {  //click된 todos의 타입에 따라 투�
     paintTodos();
 }
 
+function loadTodos() {
+    const loadedTodos = localStorage.getItem(ToDos_ls);
+    if(loadedTodos != null){
+        const parsedTodos =JSON.parse(loadedTodos)  // JSON.parse(); 텍스트를 자바스크립트 객체로 변환
+        parsedTodos.forEach(function(todo){
+            paintTodos(todo.text);
+        });
+    }
+}
 
 //js파일이 실행되자마자 호출되는 함수
 const init = () => {
@@ -255,6 +274,7 @@ const init = () => {
 
     completeAllBtnElem.addEventListener('click',  onClickCompleteAll);
     setLeftItems();
+    loadTodos();
 }
 
 init()
