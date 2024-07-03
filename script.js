@@ -14,7 +14,7 @@ const ToDos_ls = "todos"; //local storage에 todoList 변수명을 저장한 상
 let todos = [];  // todos 할일을 담을 배열
 
 function saveTodos() {   //localStorage에 리스트 저장
-    localStorage.setItem('ToDos_ls',JSON.stringify(todos));
+    localStorage.setItem(ToDos_ls,JSON.stringify(todos));
     // 웹 스토리지는 오직 문자형(string) 데이터 타입만 지원 (다른 타입의 데이터를 저장하려고 할 때 문자형으로 변환을 하기 때문)하므로 json형태로 데이터를 읽고 쓰는 것이 일반적
 };
 
@@ -250,10 +250,10 @@ const onClickShowTodosType = (e) => {  //click된 todos의 타입에 따라 투�
 
 function loadTodos() {
     const loadedTodos = localStorage.getItem(ToDos_ls);
-    if(loadedTodos != null){
-        const parsedTodos =JSON.parse(loadedTodos)  // JSON.parse(); 텍스트를 자바스크립트 객체로 변환
-        parsedTodos.forEach(function(todo){
-            paintTodos(todo.text);
+    if(loadedTodos !== null){
+        const parsedTodos = JSON.parse(loadedTodos)  // JSON.parse(); 텍스트를 자바스크립트 객체로 변환
+        parsedTodos.forEach(function(todo){  // 객체 내용 한개씩 파라미터로 넣어서 함수 실행
+            paintTodos(todo.text);  // 리스트 추가하는 함수
         });
     }
 }
